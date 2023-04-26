@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="03e2737d-0b87-4b10-877f-73287418fcfe" name="Changes" comment="project">
-      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CMClientApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientApp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CMClientApp_1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientApp_1.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CMClientEventHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientEventHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CMClientEventHandler_1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientEventHandler_1.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CMServerApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMServerApp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CMServerEventHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMServerEventHandler.java" afterDir="false" />
-    </list>
+    <list default="true" id="03e2737d-0b87-4b10-877f-73287418fcfe" name="Changes" comment="project" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -62,6 +53,9 @@
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="cm.app.init.login" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\양지석\CM_Maven\CMApp\src\main\java" />
       <recent name="C:\Users\양지석\CM_Maven\CMApp" />
@@ -103,7 +97,14 @@
       <option name="project" value="LOCAL" />
       <updated>1682512671714</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="project">
+      <created>1682514158802</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1682514158802</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
