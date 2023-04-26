@@ -4,20 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="03e2737d-0b87-4b10-877f-73287418fcfe" name="Changes" comment="test">
-      <change afterPath="$PROJECT_DIR$/client-file-path/throughput-test.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server-file-path/throughput-test.jpg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/CMClientApp_1.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/CMClientApp_2.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/CMClientEventHandler_1.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/CMClientEventHandler_2.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="03e2737d-0b87-4b10-877f-73287418fcfe" name="Changes" comment="project">
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cm-client.conf" beforeDir="false" afterPath="$PROJECT_DIR$/cm-client.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CMClientApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/CMClientApp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CMClientEventHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/CMClientEventHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CMServerApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/CMServerApp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CMServerEventHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/CMServerEventHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/CMClientApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientApp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/CMClientApp_1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientApp_1.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/CMClientEventHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientEventHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/CMClientEventHandler_1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientEventHandler_1.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/CMServerApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMServerApp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/CMServerEventHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMServerEventHandler.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,6 +53,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "last_directory_selection": "C:/Users/양지석/CM_Maven/CMApp/src/main/java",
     "last_opened_file_path": "C:/Users/양지석/CM_Maven/CMApp/src/main/java",
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.15",
@@ -93,7 +89,21 @@
       <option name="project" value="LOCAL" />
       <updated>1682387839512</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="project">
+      <created>1682512514686</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1682512514686</updated>
+    </task>
+    <task id="LOCAL-00003" summary="project">
+      <created>1682512671714</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1682512671714</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -110,7 +120,8 @@
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
     <MESSAGE value="test" />
-    <option name="LAST_COMMIT_MESSAGE" value="test" />
+    <MESSAGE value="project" />
+    <option name="LAST_COMMIT_MESSAGE" value="project" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

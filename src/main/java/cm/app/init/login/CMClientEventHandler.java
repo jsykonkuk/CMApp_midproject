@@ -8,6 +8,7 @@ import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
 
 public class CMClientEventHandler implements CMAppEventHandler {
     private CMClientStub clientStub;
+    private long startTimeOfFileSync;
 
     public CMClientEventHandler(CMClientStub clientStub) {
         this.clientStub = clientStub;
@@ -150,5 +151,9 @@ public class CMClientEventHandler implements CMAppEventHandler {
             default:
                 break;
         }
+    }
+
+    public void setStartTimeOfFileSync(long startTimeOfFileSync) {
+        this.startTimeOfFileSync = startTimeOfFileSync;
     }
 }
