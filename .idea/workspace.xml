@@ -5,22 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="03e2737d-0b87-4b10-877f-73287418fcfe" name="Changes" comment="cds_project">
-      <change afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMWinClient.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMWinClientEventHandler.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMWinClientEventHandler_1.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMWinClient_1.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMWinServer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMWinServerEventHandler.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cm-client.conf" beforeDir="false" afterPath="$PROJECT_DIR$/cm-client.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CMClientApp_2.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/CMClientEventHandler_2.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientApp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientApp_1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientApp_1.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientEventHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientEventHandler.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientEventHandler_1.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMClientEventHandler_1.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMServerApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMServerApp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMServerEventHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMServerEventHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMWinClient.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/cm/app/init/login/CMWinClient.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,6 +54,12 @@
     "project.structure.proportion": "0.15",
     "project.structure.side.proportion": "0.2",
     "settings.editor.selected.configurable": "reference.settings.project.maven.repository.indices"
+  },
+  "keyToStringList": {
+    "ChangesTree.GroupingKeys": [
+      "module",
+      "directory"
+    ]
   }
 }]]></component>
   <component name="RecentsManager">
@@ -130,7 +123,49 @@
       <option name="project" value="LOCAL" />
       <updated>1682516379401</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="cds_project">
+      <created>1686677857231</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1686677857232</updated>
+    </task>
+    <task id="LOCAL-00007" summary="cds_project">
+      <created>1686677868252</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1686677868252</updated>
+    </task>
+    <task id="LOCAL-00008" summary="cds_project">
+      <created>1686677892237</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1686677892237</updated>
+    </task>
+    <task id="LOCAL-00009" summary="cds_project">
+      <created>1686677897316</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1686677897316</updated>
+    </task>
+    <task id="LOCAL-00010" summary="cds_project">
+      <created>1686677972061</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1686677972061</updated>
+    </task>
+    <task id="LOCAL-00011" summary="cds_project">
+      <created>1686678836935</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1686678836935</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

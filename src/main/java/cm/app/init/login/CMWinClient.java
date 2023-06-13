@@ -17,7 +17,102 @@ import kr.ac.konkuk.ccslab.cm.info.*;
 import kr.ac.konkuk.ccslab.cm.info.enums.CMFileSyncMode;
 import kr.ac.konkuk.ccslab.cm.manager.*;
 import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
+import java.io.*;
+import java.nio.file.*;
 
+public class FileSynchronizationClient {
+    private static final String SERVER_DIRECTORY = "server_directory/";
+    private static final String CLIENT_DIRECTORY = "client_directory/";
+
+    public static void main(String[] args) {
+        // Start monitoring the client directory for file updates
+        startFileMonitoring();
+    }
+
+    private static void startFileMonitoring() {
+        try {
+            WatchService watchService = FileSystems.getDefault().newWatchService();
+            Path clientDirectoryPath = Paths.get(CLIENT_DIRECTORY);
+            clientDirectoryPath.register(watchService, StandardWatchEventKinds.ENTRY_CREATE,
+                    StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
+
+            System.out.println("Monitoring client directory for file updates...");
+
+            while (true) {
+                WatchKey key = watchService.take();
+
+                for (WatchEvent<?> event : key.pollEvents()) {
+                    WatchEvent.Kind<?> kind = event.kind();
+
+                    if (kind == StandardWatchEventKinds.OVERFLOW) {
+                        continue;
+                    }
+
+                    WatchEvent<Path> pathEvent = (WatchEvent<Path>) event;
+                    Path filePath = clientDirectoryPath.resolve(pathEvent.context());
+
+                    if (kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                        handleFileUpdate(filePath);
+                    } else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+                        handleFileDeletion(filePath);
+                    }
+                }
+
+                if (!key.reset()) {
+                    break;
+                }
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void handleFileUpdate(Path filePath) {
+        System.out.println("Detected file update: " + filePath);
+
+        // Verify if the update conflicts with files on the server
+        if (!isUpdateConflicting(filePath)) {
+            // Send the updated file to the server to replace the existing file
+            sendFileToServer(filePath);
+        } else {
+            System.out.println("Update conflicts with files on the server. Skipping synchronization.");
+        }
+    }
+
+    private static boolean isUpdateConflicting(Path filePath) {
+        // Perform logical clock comparison with the server's version of the file
+        // Return true if there is a conflict, false otherwise
+        // Implement your logical clock comparison logic here
+        return false;
+    }
+
+    private static void sendFileToServer(Path filePath) {
+        try {
+            Path serverFilePath = Paths.get(SERVER_DIRECTORY + filePath.getFileName());
+            Files.copy(filePath, serverFilePath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("File synchronized with the server: " + filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void handleFileDeletion(Path filePath) {
+        System.out.println("Detected file deletion: " + filePath);
+
+        // Delete the corresponding file from the server
+        deleteFileFromServer(filePath);
+    }
+
+    private static void deleteFileFromServer(Path filePath) {
+        try {
+            Path serverFilePath = Paths.get(SERVER_DIRECTORY + filePath.getFileName());
+            Files.deleteIfExists(serverFilePath);
+            System.out.println("File deleted from the server: " + filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
 public class CMWinClient_1 extends JFrame {
 
     private static final long serialVersionUID = 1L;
