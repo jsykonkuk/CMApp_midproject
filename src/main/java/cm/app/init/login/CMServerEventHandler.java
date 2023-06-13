@@ -1,27 +1,51 @@
-package cm.app.init.login;
+import java.util.Iterator;
+import java.io.*;
+import java.nio.channels.DatagramChannel;
+import java.nio.channels.SocketChannel;
 
+import kr.ac.konkuk.ccslab.cm.event.CMDummyEvent;
 import kr.ac.konkuk.ccslab.cm.event.CMEvent;
 import kr.ac.konkuk.ccslab.cm.event.CMFileEvent;
+import kr.ac.konkuk.ccslab.cm.event.CMInterestEvent;
+import kr.ac.konkuk.ccslab.cm.event.CMMultiServerEvent;
+import kr.ac.konkuk.ccslab.cm.event.CMSNSEvent;
 import kr.ac.konkuk.ccslab.cm.event.CMSessionEvent;
 import kr.ac.konkuk.ccslab.cm.event.CMUserEvent;
+import kr.ac.konkuk.ccslab.cm.event.CMUserEventField;
 import kr.ac.konkuk.ccslab.cm.event.handler.CMAppEventHandler;
+import kr.ac.konkuk.ccslab.cm.event.mqttevent.CMMqttEvent;
+import kr.ac.konkuk.ccslab.cm.event.mqttevent.CMMqttEventCONNECT;
+import kr.ac.konkuk.ccslab.cm.event.mqttevent.CMMqttEventDISCONNECT;
+import kr.ac.konkuk.ccslab.cm.event.mqttevent.CMMqttEventPUBACK;
+import kr.ac.konkuk.ccslab.cm.event.mqttevent.CMMqttEventPUBCOMP;
+import kr.ac.konkuk.ccslab.cm.event.mqttevent.CMMqttEventPUBLISH;
+import kr.ac.konkuk.ccslab.cm.event.mqttevent.CMMqttEventPUBREC;
+import kr.ac.konkuk.ccslab.cm.event.mqttevent.CMMqttEventPUBREL;
+import kr.ac.konkuk.ccslab.cm.event.mqttevent.CMMqttEventSUBSCRIBE;
+import kr.ac.konkuk.ccslab.cm.event.mqttevent.CMMqttEventUNSUBSCRIBE;
 import kr.ac.konkuk.ccslab.cm.info.CMConfigurationInfo;
 import kr.ac.konkuk.ccslab.cm.info.CMInfo;
+import kr.ac.konkuk.ccslab.cm.manager.CMDBManager;
 import kr.ac.konkuk.ccslab.cm.manager.CMFileTransferManager;
 import kr.ac.konkuk.ccslab.cm.stub.CMServerStub;
 
-import java.io.*;
 
 public class CMServerEventHandler implements CMAppEventHandler {
     private CMServerStub m_serverStub;
+    private int m_nCheckCount;	// for internal forwarding simulation
+    private boolean m_bDistFileProc;	// for distributed file processing
 
-    public CMServerEventHandler(CMServerStub serverStub) {
+    public CMServerEventHandler(CMServerStub serverStub)
+    {
         m_serverStub = serverStub;
+        m_nCheckCount = 0;
+        m_bDistFileProc = false;
     }
 
     @Override
     public void processEvent(CMEvent cme) {
-        switch (cme.getType()) {
+        switch(cme.getType())
+        {
             case CMInfo.CM_SESSION_EVENT:
                 processSessionEvent(cme);
                 break;
@@ -32,103 +56,135 @@ public class CMServerEventHandler implements CMAppEventHandler {
                 processFileEvent(cme);
                 break;
             default:
-                break;
+                return;
         }
     }
 
-    private void processSessionEvent(CMEvent cme) {
+    private void processSessionEvent(CMEvent cme)
+    {
+        CMConfigurationInfo confInfo = m_serverStub.getCMInfo().getConfigurationInfo();
         CMSessionEvent se = (CMSessionEvent) cme;
-        switch (se.getID()) {
+        switch(se.getID())
+        {
             case CMSessionEvent.LOGIN:
-                System.out.println("--> [" + se.getUserName() + "] requests login.");
+                System.out.println("["+se.getUserName()+"] requests login.");
+                if(confInfo.isLoginScheme())
+                {
+                    // user authentication...
+                    // CM DB must be used in the following authentication..
+                    boolean ret = CMDBManager.authenticateUser(se.getUserName(), se.getPassword(),
+                            m_serverStub.getCMInfo());
+                    if(!ret)
+                    {
+                        System.out.println("["+se.getUserName()+"] authentication fails!");
+                        m_serverStub.replyEvent(se, 0);
+                    }
+                    else
+                    {
+                        System.out.println("["+se.getUserName()+"] authentication succeeded.");
+                        m_serverStub.replyEvent(se, 1);
+                    }
+                }
                 break;
-            case CMSessionEvent.SESSION_ADD_USER:
-                System.out.println("--> [" + se.getUserName() + "] requests login.");
+            case CMSessionEvent.LOGOUT:
+                System.out.println("["+se.getUserName()+"] logs out.");
+                break;
+            case CMSessionEvent.REQUEST_SESSION_INFO:
+                System.out.println("["+se.getUserName()+"] requests session information.");
+                break;
+
                 break;
             default:
                 return;
         }
     }
 
-    private void processUserEvent(CMEvent cme) {
-        CMUserEvent ue = (CMUserEvent) cme;
-        switch (ue.getStringID()) {
-            case "userInfo":
-                System.out.println("--> user event ID: " + ue.getStringID());
-                String name = ue.getEventField(CMInfo.CM_STR, "name");
-                int age = Integer.parseInt(ue.getEventField(CMInfo.CM_INT, "age"));
-                double weight = Double.parseDouble(ue.getEventField(CMInfo.CM_DOUBLE, "weight"));
-                System.out.println("--> name: " + name);
-                System.out.println("--> age: " + age);
-                System.out.println("--> weight: " + weight);
+    private void processInterestEvent(CMEvent cme)
+    {
+        CMInterestEvent ie = (CMInterestEvent) cme;
+        switch(ie.getID())
+        {
+            case CMInterestEvent.USER_ENTER:
+                System.out.println("["+ie.getUserName()+"] enters group("+ie.getCurrentGroup()+") in session("
+                        +ie.getHandlerSession()+").");
+                break;
+            case CMInterestEvent.USER_LEAVE:
+                System.out.println("["+ie.getUserName()+"] leaves group("+ie.getHandlerGroup()+") in session("
+                        +ie.getHandlerSession()+").");
                 break;
             default:
-                System.err.println("--> unknown CMUserEvent ID: " + ue.getStringID());
+                return;
         }
     }
-
-    private void processFileEvent(CMEvent cme) {
+    private void processFileEvent(CMEvent cme)
+    {
         CMFileEvent fe = (CMFileEvent) cme;
-        switch (fe.getID()) {
+        switch(fe.getID())
+        {
             case CMFileEvent.REQUEST_PERMIT_PULL_FILE:
-                System.out.println("[" + fe.getFileReceiver() + "] requests file(" + fe.getFileName() + ").");
-                System.err.print("[" + fe.getFileReceiver() + "] requests file(" + fe.getFileName() + ").\n");
+                System.out.println("["+fe.getFileReceiver()+"] requests file("+fe.getFileName()+").");
+                System.err.print("["+fe.getFileReceiver()+"] requests file("+fe.getFileName()+").\n");
                 System.err.print("The pull-file request is not automatically permitted!\n");
                 System.err.print("To change to automatically permit the pull-file request, \n");
                 System.err.print("set the PERMIT_FILE_TRANSFER field to 1 in the cm-server.conf file\n");
                 break;
             case CMFileEvent.REPLY_PERMIT_PULL_FILE:
-                if (fe.getReturnCode() == -1) {
-                    System.err.print("[" + fe.getFileName() + "] does not exist in the owner!\n");
-                } else if (fe.getReturnCode() == 0) {
-                    System.err.print("[" + fe.getFileSender() + "] rejects to send file("
-                            + fe.getFileName() + ").\n");
+                if(fe.getReturnCode() == -1)
+                {
+                    System.err.print("["+fe.getFileName()+"] does not exist in the owner!\n");
+                }
+                else if(fe.getReturnCode() == 0)
+                {
+                    System.err.print("["+fe.getFileSender()+"] rejects to send file("
+                            +fe.getFileName()+").\n");
                 }
                 break;
             case CMFileEvent.REQUEST_PERMIT_PUSH_FILE:
-                System.out.println("[" + fe.getFileSender() + "] wants to send a file(" + fe.getFilePath() +
+                System.out.println("["+fe.getFileSender()+"] wants to send a file("+fe.getFilePath()+
                         ").");
                 System.err.print("The push-file request is not automatically permitted!\n");
                 System.err.print("To change to automatically permit the push-file request, \n");
                 System.err.print("set the PERMIT_FILE_TRANSFER field to 1 in the cm-server.conf file\n");
                 break;
             case CMFileEvent.REPLY_PERMIT_PUSH_FILE:
-                if (fe.getReturnCode() == 0) {
-                    System.err.print("[" + fe.getFileReceiver() + "] rejected the push-file request!\n");
-                    System.err.print("file path(" + fe.getFilePath() + "), size(" + fe.getFileSize() + ").\n");
+                if(fe.getReturnCode() == 0)
+                {
+                    System.err.print("["+fe.getFileReceiver()+"] rejected the push-file request!\n");
+                    System.err.print("file path("+fe.getFilePath()+"), size("+fe.getFileSize()+").\n");
                 }
                 break;
             case CMFileEvent.START_FILE_TRANSFER:
             case CMFileEvent.START_FILE_TRANSFER_CHAN:
-                System.out.println("[" + fe.getFileSender() + "] is about to send file(" + fe.getFileName() + ").");
+                System.out.println("["+fe.getFileSender()+"] is about to send file("+fe.getFileName()+").");
                 break;
             case CMFileEvent.END_FILE_TRANSFER:
             case CMFileEvent.END_FILE_TRANSFER_CHAN:
-                System.out.println("[" + fe.getFileSender() + "] completes to send file(" + fe.getFileName() + ", "
-                        + fe.getFileSize() + " Bytes).");
+                System.out.println("["+fe.getFileSender()+"] completes to send file("+fe.getFileName()+", "
+                        +fe.getFileSize()+" Bytes).");
                 String strFile = fe.getFileName();
-                boolean m_bDistFileProc = false;
-                if (m_bDistFileProc) {
+                if(m_bDistFileProc)
+                {
                     processFile(fe.getFileSender(), strFile);
                     m_bDistFileProc = false;
                 }
                 break;
             case CMFileEvent.REQUEST_DIST_FILE_PROC:
-                System.out.println("[" + fe.getFileReceiver() + "] requests the distributed file processing.");
+                System.out.println("["+fe.getFileReceiver()+"] requests the distributed file processing.");
                 m_bDistFileProc = true;
                 break;
             case CMFileEvent.CANCEL_FILE_SEND:
             case CMFileEvent.CANCEL_FILE_SEND_CHAN:
-                System.out.println("[" + fe.getFileSender() + "] cancelled the file transfer.");
+                System.out.println("["+fe.getFileSender()+"] cancelled the file transfer.");
                 break;
             case CMFileEvent.CANCEL_FILE_RECV_CHAN:
-                System.out.println("[" + fe.getFileReceiver() + "] cancelled the file request.");
+                System.out.println("["+fe.getFileReceiver()+"] cancelled the file request.");
                 break;
         }
         return;
     }
 
-    private void processFile(String strSender, String strFile) {
+    private void processFile(String strSender, String strFile)
+    {
         CMConfigurationInfo confInfo = m_serverStub.getCMInfo().getConfigurationInfo();
         String strFullSrcFilePath = null;
         String strModifiedFile = null;
@@ -139,13 +195,13 @@ public class CMServerEventHandler implements CMAppEventHandler {
         long lStartTime = System.currentTimeMillis();
 
         // change the modified file name
-        strModifiedFile = "m-" + strFile;
-        strModifiedFile = confInfo.getTransferedFileHome().toString() + File.separator + strSender +
-                File.separator + strModifiedFile;
+        strModifiedFile = "m-"+strFile;
+        strModifiedFile = confInfo.getTransferedFileHome().toString()+File.separator+strSender+
+                File.separator+strModifiedFile;
 
         // stylize the file
-        strFullSrcFilePath = confInfo.getTransferedFileHome().toString() + File.separator + strSender +
-                File.separator + strFile;
+        strFullSrcFilePath = confInfo.getTransferedFileHome().toString()+File.separator+strSender+
+                File.separator+strFile;
         File srcFile = new File(strFullSrcFilePath);
         long lFileSize = srcFile.length();
         long lRemainBytes = lFileSize;
@@ -161,17 +217,21 @@ public class CMServerEventHandler implements CMAppEventHandler {
 
         try {
 
-            while (lRemainBytes > 0) {
-                if (lRemainBytes >= CMInfo.FILE_BLOCK_LEN) {
+            while( lRemainBytes > 0 )
+            {
+                if( lRemainBytes >= CMInfo.FILE_BLOCK_LEN )
+                {
                     readBytes = fis.read(fileBlock);
-                } else {
-                    readBytes = fis.read(fileBlock, 0, (int) lRemainBytes);
+                }
+                else
+                {
+                    readBytes = fis.read(fileBlock, 0, (int)lRemainBytes);
                 }
 
                 fos.write(fileBlock, 0, readBytes);
                 lRemainBytes -= readBytes;
             }
-        } catch (IOException e) {
+        } catch(IOException e) {
             e.printStackTrace();
         } finally {
             try {
@@ -183,18 +243,21 @@ public class CMServerEventHandler implements CMAppEventHandler {
         }
 
         // add some process delay here
-        for (long i = 0; i < lFileSize / 50; i++) {
-            for (long j = 0; j < lFileSize / 50; j++) {
+        for(long i = 0; i < lFileSize/50; i++)
+        {
+            for(long j = 0; j < lFileSize/50; j++)
+            {
                 //
             }
         }
 
         long lEndTime = System.currentTimeMillis();
-        System.out.println("processing delay: " + (lEndTime - lStartTime) + " ms");
+        System.out.println("processing delay: "+(lEndTime-lStartTime)+" ms");
 
         // send the modified file to the sender
         CMFileTransferManager.pushFile(strModifiedFile, strSender, m_serverStub.getCMInfo());
 
         return;
     }
+
 }

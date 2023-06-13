@@ -1,98 +1,212 @@
-package cm.app.init.login;
+import java.io.*;
+import java.util.*;
 
-import kr.ac.konkuk.ccslab.cm.entity.CMList;
-import kr.ac.konkuk.ccslab.cm.entity.CMRecvFileInfo;
-import kr.ac.konkuk.ccslab.cm.entity.CMSendFileInfo;
-import kr.ac.konkuk.ccslab.cm.info.CMFileTransferInfo;
-import kr.ac.konkuk.ccslab.cm.info.CMInfo;
-import kr.ac.konkuk.ccslab.cm.info.enums.CMFileSyncMode;
-import kr.ac.konkuk.ccslab.cm.manager.CMFileSyncManager;
+import kr.ac.konkuk.ccslab.cm.event.CMSessionEvent;
+import kr.ac.konkuk.ccslab.cm.event.CMUserEvent;
+import kr.ac.konkuk.ccslab.cm.info.*;
+import kr.ac.konkuk.ccslab.cm.manager.*;
 import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
 
-import javax.swing.*;
-import java.awt.*;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Hashtable;
-import java.util.Objects;
-import java.util.Scanner;
-import java.util.Set;
 
 public class CMClientApp {
     private CMClientStub m_clientStub;
-    private cm.app.init.login.CMClientEventHandler m_eventHandler;
-    public CMClientApp() {
+    private CMClientEventHandler_1 m_eventHandler;
+    private boolean m_bRun;
+    private Scanner m_scan = null;
+
+    public CMClientApp()
+    {
         m_clientStub = new CMClientStub();
-        m_eventHandler = new cm.app.init.login.CMClientEventHandler(m_clientStub);
+        m_eventHandler = new CMClientEventHandler_1(m_clientStub);
+        m_bRun = true;
     }
 
-    public CMClientStub getClientStub() {
+    public CMClientStub getClientStub()
+    {
         return m_clientStub;
     }
 
-    public cm.app.init.login.CMClientEventHandler getClientEventHandler() {
+    public CMClientEventHandler_1 getClientEventHandler()
+    {
         return m_eventHandler;
     }
 
-    public static void main(String[] args) {
-
-        Scanner scanner = new Scanner(System.in);
-        CMClientApp client = new CMClientApp();
-        CMClientStub clientStub = client.getClientStub();
-        cm.app.init.login.CMClientEventHandler eventHandler = client.getClientEventHandler();
-        boolean ret = false;
-
-        // initialize CM
-        clientStub.setAppEventHandler(eventHandler);
-        ret = clientStub.startCM();
-
-        if(ret)
-            System.out.println("CM initialization succeeds.");
-        else {
-            System.err.println("CM initialization error!");
-            return;
-        }
-
-        // login CM server
-        System.out.println("=== login: ");
-        System.out.println("user name: jiseok");
-        System.out.println("password: jiseok");
-        ret = clientStub.loginCM("jiseok", "jiseok");
-
-        if(ret)
-            System.out.println("successfully sent the login request.");
-        else {
-            System.err.println("failed the login request!");
-            return;
-        }
-
-        // terminate CM
-        System.out.println("Enter to terminate CM and client: ");
-        scanner.nextLine();
-        clientStub.terminateCM();
-    }
-    public void SetFilePath()
+    public void testSyncLoginDS()
     {
+        String strUserName = null;
+        String strPassword = null;
+        CMSessionEvent loginAckEvent = null;
+        Console console = System.console();
+        if(console == null)
+        {
+            System.err.println("Unable to obtain console.");
+        }
+
+        System.out.println("====== login to default server");
+        System.out.print("user name: ");
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("====== set file path");
-        String strPath = null;
-        System.out.print("file path: ");
         try {
-            strPath = br.readLine();
+            strUserName = br.readLine();
+            if(console == null)
+            {
+                System.out.print("password: ");
+                strPassword = br.readLine();
+            }
+            else
+                strPassword = new String(console.readPassword("password: "));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        m_clientStub.setTransferedFileHome(Paths.get(strPath));
+        loginAckEvent = m_clientStub.syncLoginCM(strUserName, strPassword);
+        if(loginAckEvent != null)
+        {
+            // print login result
+            if(loginAckEvent.isValidUser() == 0)
+            {
+                System.err.println("This client fails authentication by the default server!");
+            }
+            else if(loginAckEvent.isValidUser() == -1)
+            {
+                System.err.println("This client is already in the login-user list!");
+            }
+            else
+            {
+                System.out.println("This client successfully logs in to the default server.");
+            }
+        }
+        else
+        {
+            System.err.println("failed the login request!");
+        }
 
         System.out.println("======");
     }
 
-    public void RequestFile()
+    public void testJoinSession()
+    {
+        String strSessionName = null;
+        boolean bRequestResult = false;
+        System.out.println("====== join a session");
+        System.out.print("session name: ");
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            strSessionName = br.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        bRequestResult = m_clientStub.joinSession(strSessionName);
+        if(bRequestResult)
+            System.out.println("successfully sent the session-join request.");
+        else
+            System.err.println("failed the session-join request!");
+        System.out.println("======");
+    }
+
+    public void testSyncJoinSession()
+    {
+        CMSessionEvent se = null;
+        String strSessionName = null;
+        System.out.println("====== join a session");
+        System.out.print("session name: ");
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        try {
+            strSessionName = br.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        se = m_clientStub.syncJoinSession(strSessionName);
+        if(se != null)
+        {
+            System.out.println("successfully joined a session that has ("+se.getGroupNum()+") groups.");
+        }
+        else
+        {
+            System.err.println("failed the session-join request!");
+        }
+
+        System.out.println("======");
+    }
+
+    public void testLeaveSession()
+    {
+        boolean bRequestResult = false;
+        System.out.println("====== leave the current session");
+        bRequestResult = m_clientStub.leaveSession();
+        if(bRequestResult)
+            System.out.println("successfully sent the leave-session request.");
+        else
+            System.err.println("failed the leave-session request!");
+        System.out.println("======");
+    }
+    public void testAsyncCastRecv()
+    {
+        CMUserEvent ue = new CMUserEvent();
+        boolean bRet = false;
+        String strTargetSession = null;
+        String strTargetGroup = null;
+        String strMinNumReplyEvents = null;
+        int nMinNumReplyEvents = 0;
+
+        // a user event: (id, 112) (string id, "testCastRecv")
+        // a reply user event: (id, 223) (string id, "testReplyCastRecv")
+
+        System.out.println("====== test asynchronous castrecv");
+        // set a user event
+        ue.setID(112);
+        ue.setStringID("testCastRecv");
+
+        // set event target session and group
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("user event to be sent: (id, 112), (string id, \"testCastRecv\")");
+        System.out.println("reply event to be received: (id, 223), (string id, \"testReplyCastRecv\")");
+
+        try {
+            System.out.print("Target session(empty for null): ");
+            strTargetSession = br.readLine().trim();
+            System.out.print("Target group(empty for null): ");
+            strTargetGroup = br.readLine().trim();
+            System.out.print("Minimum number of reply events(empty for 0): ");
+            strMinNumReplyEvents = br.readLine().trim();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        if(strTargetSession.isEmpty())
+            strTargetSession = null;
+        if(strTargetGroup.isEmpty())
+            strTargetGroup = null;
+        if(strMinNumReplyEvents.isEmpty())
+            strMinNumReplyEvents = "0";
+
+        try {
+            nMinNumReplyEvents = Integer.parseInt(strMinNumReplyEvents);
+        }catch(NumberFormatException e) {
+            e.printStackTrace();
+            System.err.println("Wrong number format!");
+            return;
+        }
+
+        System.out.println("Target session: "+strTargetSession);
+        System.out.println("Target group: "+strTargetGroup);
+        System.out.println("Minimum number of reply events: "+nMinNumReplyEvents);
+
+        m_eventHandler.setStartTime(System.currentTimeMillis());
+        m_eventHandler.setMinNumWaitedEvents(nMinNumReplyEvents);
+        m_eventHandler.setRecvReplyEvents(0);
+        bRet = m_clientStub.cast(ue, strTargetSession, strTargetGroup);
+
+        if(!bRet)
+        {
+            System.err.println("Error in asynchronous castrecv service!");
+            return;
+        }
+        System.out.println("======");
+
+    }
+    public void testRequestFile()
     {
         boolean bReturn = false;
         String strFileName = null;
@@ -129,7 +243,7 @@ public class CMClientApp {
         System.out.println("======");
     }
 
-    public void PushFile()
+    public void testPushFile()
     {
         String strFilePath = null;
         String strReceiver = null;
@@ -166,152 +280,129 @@ public class CMClientApp {
 
         System.out.println("======");
     }
-    public void printSendRecvFileInfo()
+    public void testSendMultipleFiles()
     {
-        CMFileTransferInfo fInfo = m_clientStub.getCMInfo().getFileTransferInfo();
-        Hashtable<String, CMList<CMSendFileInfo>> sendHashtable = fInfo.getSendFileHashtable();
-        Hashtable<String, CMList<CMRecvFileInfo>> recvHashtable = fInfo.getRecvFileHashtable();
-        Set<String> sendKeySet = sendHashtable.keySet();
-        Set<String> recvKeySet = recvHashtable.keySet();
-
-        System.out.print("==== sending file info\n");
-        for(String receiver : sendKeySet)
-        {
-            CMList<CMSendFileInfo> sendList = sendHashtable.get(receiver);
-            System.out.print(sendList+"\n");
-        }
-
-        System.out.print("==== receiving file info\n");
-        for(String sender : recvKeySet)
-        {
-            CMList<CMRecvFileInfo> recvList = recvHashtable.get(sender);
-            System.out.print(recvList+"\n");
-        }
-    }
-    private void StartFileSyncWithManualMode() {
-        System.out.println("========== start file-sync with manual mode");
-
-        m_eventHandler.setStartTimeOfFileSync(System.currentTimeMillis());
-
-        boolean ret = m_clientStub.startFileSync(CMFileSyncMode.MANUAL);
-        if(!ret) {
-            System.err.println("Start error of file sync with manual mode!");
-            m_eventHandler.setStartTimeOfFileSync(0);
-        }
-        else {
-            System.out.println("File sync with manual mode starts.");
-        }
-    }
-
-    private void StartFileSyncWithAutoMode() {
-        System.out.println("========== start file-sync with auto mode");
-
-        m_eventHandler.setStartTimeOfFileSync(System.currentTimeMillis());
-
-        boolean ret = m_clientStub.startFileSync(CMFileSyncMode.AUTO);
-        if(!ret) {
-            System.err.println("Start error of file sync with auto mode!");
-            m_eventHandler.setStartTimeOfFileSync(0);
-        }
-        else {
-            System.out.println("File sync with auto mode starts.");
-        }
-    }
-
-    private void PrintCurrentFileSyncMode() {
-        System.out.println("========== print current file-sync mode");
-        CMFileSyncMode currentMode = m_clientStub.getCurrentFileSyncMode();
-        if(currentMode == null) {
-            System.err.println("Error! Please see error message in console for more information!");
-            return;
-        }
-        System.out.println("Current file-sync mode is "+currentMode+".");
-    }
-
-    private void StopFileSync() {
-        System.out.println("========== stop file-sync");
-        boolean ret = m_clientStub.stopFileSync();
-        if(!ret) {
-            System.err.println("Stop error of file sync!");
-        }
-        else {
-            System.out.println("File sync stops.");
-        }
-    }
-
-    private void OpenFileSyncFolder() {
-        System.out.println("========== open file-sync folder");
-
-        Path syncHome = m_clientStub.getFileSyncHome();
-        if(syncHome == null) {
-            System.err.println("File sync home is null!");
-            System.err.println("Please see error message on console for more information.");
-            return;
-        }
-
-        // open syncHome folder
-        Desktop desktop = Desktop.getDesktop();
+        String[] strFiles = null;
+        String strFileList = null;
+        int nMode = -1; // 1: push, 2: pull
+        int nFileNum = -1;
+        String strTarget = null;
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        System.out.println("====== pull/push multiple files");
         try {
-            desktop.open(syncHome.toFile());
+            System.out.print("Select mode (1: push, 2: pull): ");
+            nMode = Integer.parseInt(br.readLine());
+            if(nMode == 1)
+            {
+                System.out.print("Input receiver name: ");
+                strTarget = br.readLine();
+            }
+            else if(nMode == 2)
+            {
+                System.out.print("Input file owner name: ");
+                strTarget = br.readLine();
+            }
+            else
+            {
+                System.out.println("Incorrect transmission mode!");
+                return;
+            }
+
+            System.out.print("Number of files: ");
+            nFileNum = Integer.parseInt(br.readLine());
+            System.out.print("Input file names separated with space: ");
+            strFileList = br.readLine();
+
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return;
         } catch (IOException e) {
             e.printStackTrace();
+            return;
         }
-    }
 
-    private void RequestFileSyncOnlineMode() {
-        System.out.println("========== request file-sync online mode");
-        // get sync home
-        CMFileSyncManager syncManager = m_clientStub.findServiceManager(CMFileSyncManager.class);
-        Objects.requireNonNull(syncManager);
-        Path syncHome = syncManager.getClientSyncHome();
-
-        // open file chooser to choose files
-        JFileChooser fc = new JFileChooser();
-        fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-        fc.setMultiSelectionEnabled(true);
-        fc.setCurrentDirectory(syncHome.toFile());
-        int fcRet = fc.showOpenDialog(null);
-        if(fcRet != JFileChooser.APPROVE_OPTION) return;
-        File[] files = fc.getSelectedFiles();
-        if(CMInfo._CM_DEBUG) {
-            for(File file : files)
-                System.out.println("file = " + file);
+        strFileList.trim();
+        strFiles = strFileList.split("\\s+");
+        if(strFiles.length != nFileNum)
+        {
+            System.out.println("The number of files incorrect!");
+            return;
         }
-        if(files.length < 1) return;
 
-        // call the request API of the client stub
-        boolean ret = m_clientStub.requestFileSyncOnlineMode(files);
-        if(!ret) {
-            System.err.println("request error!");
+        for(int i = 0; i < nFileNum; i++)
+        {
+            switch(nMode)
+            {
+                case 1: // push
+                    CMFileTransferManager.pushFile(strFiles[i], strTarget, m_clientStub.getCMInfo());
+                    break;
+                case 2: // pull
+                    CMFileTransferManager.requestPermitForPullFile(strFiles[i], strTarget, m_clientStub.getCMInfo());
+                    break;
+            }
         }
+
         return;
     }
 
-    private void RequestFileSyncLocalMode() {
-        System.out.println("========== request file-sync local mode");
-        // get sync home
-        CMFileSyncManager syncManager = m_clientStub.findServiceManager(CMFileSyncManager.class);
-        Objects.requireNonNull(syncManager);
-        Path syncHome = syncManager.getClientSyncHome();
+    public void testSplitFile()
+    {
+        String strSrcFile = null;
+        String strSplitFile = null;
+        long lFileSize = -1;
+        long lFileOffset = 0;
+        long lSplitSize = -1;
+        long lSplitRemainder = -1;
+        int nSplitNum = -1;
+        RandomAccessFile raf = null;
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        // open file chooser to choose files
-        JFileChooser fc = new JFileChooser();
-        fc.setMultiSelectionEnabled(true);
-        fc.setCurrentDirectory(syncHome.toFile());
-        int fcRet = fc.showOpenDialog(null);
-        if(fcRet != JFileChooser.APPROVE_OPTION) return;
-        File[] files = fc.getSelectedFiles();
-        if(CMInfo._CM_DEBUG) {
-            for(File file : files)
-                System.out.println("file = " + file);
-        }
-        if(files.length < 1) return;
+        System.out.println("====== split a file");
+        try {
+            System.out.print("Input source file name: ");
+            strSrcFile = br.readLine();
+            System.out.print("Input the number of splitted files: ");
+            nSplitNum = Integer.parseInt(br.readLine());
+            raf = new RandomAccessFile(strSrcFile, "r");
+            lFileSize = raf.length();
 
-        // call the request API of the client stub
-        boolean ret = m_clientStub.requestFileSyncLocalMode(files);
-        if(!ret) {
-            System.out.println("request error!");
+            lSplitSize = lFileSize / nSplitNum;
+            lSplitRemainder = lFileSize % lSplitSize;
+
+            for(int i = 0; i < nSplitNum; i++)
+            {
+                // get the name of split file ('srcfile'-i.split)
+                int index = strSrcFile.lastIndexOf(".");
+                strSplitFile = strSrcFile.substring(0, index)+"-"+(i+1)+".split";
+
+                // update offset
+                lFileOffset = i*lSplitSize;
+
+                if(i+1 != nSplitNum)
+                    CMFileTransferManager.splitFile(raf, lFileOffset, lSplitSize, strSplitFile);
+                else
+                    CMFileTransferManager.splitFile(raf, lFileOffset, lSplitSize+lSplitRemainder, strSplitFile);
+
+            }
+
+            raf.close();
+        } catch (FileNotFoundException fe) {
+            fe.printStackTrace();
+            return;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
         }
+
         return;
     }
+    public static void main(String[] args) {
+        CMClientApp_1 client = new CMClientApp_1();
+        CMClientStub cmStub = client.getClientStub();
+        cmStub.setAppEventHandler(client.getClientEventHandler());
+        client.testStartCM();
+
+        System.out.println("Client application is terminated.");
+    }
+
 }

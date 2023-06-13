@@ -1,61 +1,43 @@
-package cm.app.init.login;
 
-import kr.ac.konkuk.ccslab.cm.entity.CMList;
-import kr.ac.konkuk.ccslab.cm.entity.CMRecvFileInfo;
-import kr.ac.konkuk.ccslab.cm.entity.CMSendFileInfo;
-import kr.ac.konkuk.ccslab.cm.info.CMFileTransferInfo;
+import kr.ac.konkuk.ccslab.cm.entity.CMSession;
 import kr.ac.konkuk.ccslab.cm.info.CMInfo;
+import kr.ac.konkuk.ccslab.cm.info.CMInteractionInfo;
+import kr.ac.konkuk.ccslab.cm.sns.CMSNSUserAccessSimulator;
 import kr.ac.konkuk.ccslab.cm.stub.CMServerStub;
 
-import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Hashtable;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
+import javax.swing.JOptionPane;
 
 public class CMServerApp {
     private CMServerStub m_serverStub;
-    private cm.app.init.login.CMServerEventHandler m_eventHandler;
+    private CMServerEventHandler m_eventHandler;
+    private boolean m_bRun;
+    private CMSNSUserAccessSimulator m_uaSim;
+    private Scanner m_scan = null;
 
-    public CMServerApp() {
+    public CMServerApp()
+    {
         m_serverStub = new CMServerStub();
-        m_eventHandler = new cm.app.init.login.CMServerEventHandler(m_serverStub);
+        m_eventHandler = new CMServerEventHandler(m_serverStub);
+        m_bRun = true;
+        m_uaSim = new CMSNSUserAccessSimulator();
     }
 
-    public CMServerStub getServerStub() {
+    public CMServerStub getServerStub()
+    {
         return m_serverStub;
     }
 
-    public cm.app.init.login.CMServerEventHandler getServerEventHandler() {
+    public CMServerEventHandler getServerEventHandler()
+    {
         return m_eventHandler;
     }
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        CMServerApp server = new CMServerApp();
-        CMServerStub serverStub = server.getServerStub();
-        serverStub.setAppEventHandler(server.getServerEventHandler());
-
-        // start CM
-        boolean ret = serverStub.startCM();
-
-        if(ret) {
-            System.out.println("CM initialization succeeds.");
-        }
-        else {
-            System.err.println("CM initialization error!");
-        }
-
-        // terminate CM
-        System.out.println("Enter to terminate CM and server: ");
-        scanner.nextLine();
-        serverStub.terminateCM();
-    }
     private void openFileSyncFolder() {
         System.out.println("=========== open file-sync folder\n");
         // ask client name
@@ -76,6 +58,22 @@ public class CMServerApp {
                 e.printStackTrace();
             }
         }
+    }
+    public void printSessionInfo()
+    {
+        System.out.println("------------------------------------------------------");
+        System.out.format("%-20s%-20s%-10s%-10s%n", "session name", "session addr", "port", "#users");
+        System.out.println("------------------------------------------------------");
+
+        CMInteractionInfo interInfo = m_serverStub.getCMInfo().getInteractionInfo();
+        Iterator<CMSession> iter = interInfo.getSessionList().iterator();
+        while(iter.hasNext())
+        {
+            CMSession session = iter.next();
+            System.out.format("%-20s%-20s%-10d%-10d%n", session.getSessionName(), session.getAddress()
+                    , session.getPort(), session.getSessionUsers().getMemberNum());
+        }
+        return;
     }
     public void setFilePath()
     {
@@ -162,84 +160,101 @@ public class CMServerApp {
 
         System.out.println("======");
     }
-
-    public void cancelRecvFile()
+    public void configureUserAccessSimulation()
     {
-        String strSender = null;
-        boolean bReturn = false;
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("====== cancel receiving a file");
+        int nUserNum = -1;
+        int nAvgDayAccCount = -1;
+        int nTotalSimDays = -1;
+        int nAccPattern = -1;
+        double dNormalMean = -1.0;
+        double dNormalSD = -1.0;
+        String strInput = null;
 
-        System.out.print("Input sender name (enter for all senders): ");
+        // retrieve current values
+        nUserNum = m_uaSim.getUserNum();
+        nAvgDayAccCount = m_uaSim.getAvgDayAccCount();
+        nTotalSimDays = m_uaSim.getTotalSimDays();
+        nAccPattern = m_uaSim.getAccPattern();
+        dNormalMean = m_uaSim.getNormalMean();
+        dNormalSD = m_uaSim.getNormalSD();
+
+        System.out.println("====== Configure variables of user access simulation");
+        System.out.println("The value in () is the current value.");
+        System.out.println("Enter in each variable to keep the current value.");
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         try {
-            strSender = br.readLine();
-            if(strSender.isEmpty())
-                strSender = null;
+            System.out.print("Number of users("+nUserNum+"): ");
+            strInput = br.readLine();
+            if(!strInput.isEmpty())
+            {
+                nUserNum = Integer.parseInt(strInput);
+                m_uaSim.setUserNum(nUserNum);
+            }
+            System.out.print("Average daily access count("+nAvgDayAccCount+"): ");
+            strInput = br.readLine();
+            if(!strInput.isEmpty())
+            {
+                nAvgDayAccCount = Integer.parseInt(strInput);
+                m_uaSim.setAvgDayAccCount(nAvgDayAccCount);
+            }
+            System.out.print("Total number of simulation days("+nTotalSimDays+"): ");
+            strInput = br.readLine();
+            if(!strInput.isEmpty())
+            {
+                nTotalSimDays = Integer.parseInt(strInput);
+                m_uaSim.setTotalSimDays(nTotalSimDays);
+            }
+            System.out.print("Access pattern("+nAccPattern+") (0: random, 1: skewed): ");
+            strInput = br.readLine();
+            if(!strInput.isEmpty())
+            {
+                nAccPattern = Integer.parseInt(strInput);
+                if(nAccPattern < 0 || nAccPattern > 1)
+                {
+                    System.err.println("Invalid access pattern!");
+                    return;
+                }
+                m_uaSim.setAccPattern(nAccPattern);
+            }
+
+            if(nAccPattern == 1) // skewed access pattern
+            {
+                System.out.print("Mean value("+dNormalMean+"): ");
+                strInput = br.readLine();
+                if(!strInput.isEmpty())
+                {
+                    dNormalMean = Double.parseDouble(strInput);
+                    m_uaSim.setNormalMean(dNormalMean);
+                }
+                System.out.println("Standard deviation("+dNormalSD+"): ");
+                strInput = br.readLine();
+                if(!strInput.isEmpty())
+                {
+                    dNormalSD = Double.parseDouble(strInput);
+                    m_uaSim.setNormalSD(dNormalSD);
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        bReturn = m_serverStub.cancelPullFile(strSender);
-
-        if(bReturn)
-        {
-            if(strSender == null)
-                strSender = "all senders";
-            System.out.println("Successfully requested to cancel receiving a file to ["+strSender+"].");
-        }
-        else
-            System.err.println("Request failed to cancel receiving a file to ["+strSender+"]!");
-
-        return;
-
-    }
-
-    public void cancelSendFile()
-    {
-        String strReceiver = null;
-        boolean bReturn = false;
-        System.out.println("====== cancel sending a file");
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.print("Input receiver name (enter for all receivers): ");
-
-        try {
-            strReceiver = br.readLine();
-            if(strReceiver.isEmpty())
-                strReceiver = null;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        bReturn = m_serverStub.cancelPushFile(strReceiver);
-
-        if(bReturn)
-            System.out.println("Successfully requested to cancel sending a file to ["+strReceiver+"]");
-        else
-            System.err.println("Request failed to cancel sending a file to ["+strReceiver+"]!");
-
         return;
     }
 
-    public void printSendRecvFileInfo()
+    // simulate user access history according to previous configuration
+    public void startUserAccessSimulation()
     {
-        CMFileTransferInfo fInfo = m_serverStub.getCMInfo().getFileTransferInfo();
-        Hashtable<String, CMList<CMSendFileInfo>> sendHashtable = fInfo.getSendFileHashtable();
-        Hashtable<String, CMList<CMRecvFileInfo>> recvHashtable = fInfo.getRecvFileHashtable();
-        Set<String> sendKeySet = sendHashtable.keySet();
-        Set<String> recvKeySet = recvHashtable.keySet();
-
-        System.out.print("==== sending file info\n");
-        for(String receiver : sendKeySet)
-        {
-            CMList<CMSendFileInfo> sendList = sendHashtable.get(receiver);
-            System.out.print(sendList+"\n");
-        }
-
-        System.out.print("==== receiving file info\n");
-        for(String sender : recvKeySet)
-        {
-            CMList<CMRecvFileInfo> recvList = recvHashtable.get(sender);
-            System.out.print(recvList+"\n");
-        }
+        System.out.println("====== Start user access simulation");
+        m_uaSim.start();
+        return;
     }
+    public static void main(String[] args) {
+        CMServerApp server = new CMServerApp();
+        CMServerStub cmStub = server.getServerStub();
+        cmStub.setAppEventHandler(server.getServerEventHandler());
+        server.startCM();
+
+        System.out.println("Server application is terminated.");
+    }
+
 }
