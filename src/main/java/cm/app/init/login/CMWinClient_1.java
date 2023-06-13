@@ -1,31 +1,26 @@
-package cm.app.init.login;
 
-import kr.ac.konkuk.ccslab.cm.entity.CMUser;
-import kr.ac.konkuk.ccslab.cm.event.CMUserEvent;
-import kr.ac.konkuk.ccslab.cm.info.CMConfigurationInfo;
-import kr.ac.konkuk.ccslab.cm.info.CMFileSyncInfo;
-import kr.ac.konkuk.ccslab.cm.info.CMInfo;
-import kr.ac.konkuk.ccslab.cm.info.CMInteractionInfo;
-import kr.ac.konkuk.ccslab.cm.info.enums.CMFileSyncMode;
-import kr.ac.konkuk.ccslab.cm.manager.CMFileSyncManager;
-import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
+import java.util.*;
 
-import javax.swing.*;
-import javax.swing.text.Style;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import javax.swing.text.StyledDocument;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Objects;
 
-;
+import javax.swing.*;
+import javax.swing.text.*;
+import kr.ac.konkuk.ccslab.cm.entity.CMList;;
+import kr.ac.konkuk.ccslab.cm.entity.CMSendFileInfo;
+import kr.ac.konkuk.ccslab.cm.entity.CMSessionInfo;
+import kr.ac.konkuk.ccslab.cm.entity.CMUser;
+import kr.ac.konkuk.ccslab.cm.event.CMSessionEvent;
+import kr.ac.konkuk.ccslab.cm.event.CMUserEvent;
+import kr.ac.konkuk.ccslab.cm.info.*;
+import kr.ac.konkuk.ccslab.cm.info.enums.CMFileSyncMode;
+import kr.ac.konkuk.ccslab.cm.manager.*;
+import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
 
-public class CMWinClient_1 extends JFrame {
+public class CMWinClient extends JFrame {
 
     private static final long serialVersionUID = 1L;
     //private JTextArea m_outTextArea;
@@ -33,7 +28,7 @@ public class CMWinClient_1 extends JFrame {
     private JTextField m_inTextField;
     private JButton m_startStopButton;
     private JButton m_loginLogoutButton;
-    CMWinClient_1()
+    CMWinClient()
     {
         MyKeyListener cmKeyListener = new MyKeyListener();
         MyActionListener cmActionListener = new MyActionListener();
@@ -78,7 +73,7 @@ public class CMWinClient_1 extends JFrame {
         m_loginLogoutButton.addActionListener(cmActionListener);
         m_loginLogoutButton.setEnabled(false);
         topButtonPanel.add(m_loginLogoutButton);
-        
+
         setVisible(true);
 
         // create a CM object and set the event handler

@@ -9,18 +9,16 @@ import java.nio.file.Path;
 
 import javax.swing.*;
 import javax.swing.text.*;
-import kr.ac.konkuk.ccslab.cm.entity.CMList;;
-import kr.ac.konkuk.ccslab.cm.entity.CMSendFileInfo;
-import kr.ac.konkuk.ccslab.cm.entity.CMSessionInfo;
+
 import kr.ac.konkuk.ccslab.cm.entity.CMUser;
-import kr.ac.konkuk.ccslab.cm.event.CMSessionEvent;
+
 import kr.ac.konkuk.ccslab.cm.event.CMUserEvent;
 import kr.ac.konkuk.ccslab.cm.info.*;
 import kr.ac.konkuk.ccslab.cm.info.enums.CMFileSyncMode;
 import kr.ac.konkuk.ccslab.cm.manager.*;
 import kr.ac.konkuk.ccslab.cm.stub.CMClientStub;
 
-public class CMWinClient extends JFrame {
+public class CMWinClient_1 extends JFrame {
 
     private static final long serialVersionUID = 1L;
     //private JTextArea m_outTextArea;
@@ -28,7 +26,7 @@ public class CMWinClient extends JFrame {
     private JTextField m_inTextField;
     private JButton m_startStopButton;
     private JButton m_loginLogoutButton;
-    CMWinClient()
+    CMWinClient_1()
     {
         MyKeyListener cmKeyListener = new MyKeyListener();
         MyActionListener cmActionListener = new MyActionListener();
